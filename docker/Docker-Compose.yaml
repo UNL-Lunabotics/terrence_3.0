@@ -1,0 +1,43 @@
+# This is the base compose file. GPU specifications will be overriden by others
+name: terrence_3.0
+services:
+  terrence_3.0:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host              # Share the same network stack as the host
+    ipc: host                       # Prevents Fast DDS error with memory sharing
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1        # (optional, avoids some shared memory issues)
+      - XDG_RUNTIME_DIR=/tmp/runtime-ubuntu
+    volumes:
+      - type: bind                 # udev database
+        source: /run/udev
+        target: /run/udev
+        read_only: true
+      - type: bind
+        source: ..
+        target: /workspaces/terrence_3.0
+        bind:
+          propagation: rshared
+      - type: bind
+        source: /dev/input
+        target: /dev/input
+        bind:
+          propagation: rshared
+      - type: bind
+        source: /dev/bus/usb
+        target: /dev/bus/usb
+        bind:
+          propagation: rshared
+    cap_add:
+      - SYS_NICE               # For real-time scheduling
+    tty: true
+    stdin_open: true
+    group_add:
+      - dialout
+      - video
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
