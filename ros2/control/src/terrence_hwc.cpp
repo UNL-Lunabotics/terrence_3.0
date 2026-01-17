@@ -131,7 +131,7 @@ namespace terrence_hwc {
     }
 
     hardware_interface::return_type TerrenceHWC::read(
-        const rclcpp::Time & /*time*/, const rclcpp::Duration & period)
+        const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
     {
         if (!comms_.connected())
         {
@@ -143,7 +143,7 @@ namespace terrence_hwc {
         return hardware_interface::return_type::OK;
     }
 
-    hardware_interface::return_type terrence_hwc ::TerrenceHWC::write(
+    hardware_interface::return_type TerrenceHWC::write(
         const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
     {
         if (!comms_.connected())
@@ -151,7 +151,7 @@ namespace terrence_hwc {
             return hardware_interface::return_type::ERROR;
         }
 
-        comms_.set_motor_values(commands_.left_wheel_cmd, commands_.right_wheel_cmd)
+        comms_.set_motor_values(commands_.left_wheel_cmd, commands_.right_wheel_cmd);
 
         return hardware_interface::return_type::OK;
     }
