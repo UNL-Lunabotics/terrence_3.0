@@ -20,13 +20,13 @@ services:
       - type: bind
         source: ..
         target: /workspaces/terrence_3.0
-        bind:
-          propagation: rshared
-      - type: bind
-        source: /dev/input
-        target: /dev/input
-        bind:
-          propagation: rshared
+        # bind:
+        #   propagation: rshared
+      # - type: bind
+      #   source: /dev/input
+      #   target: /dev/input
+      #   bind:
+      #     propagation: rshared
       - type: bind
         source: /dev/bus/usb
         target: /dev/bus/usb
@@ -39,5 +39,5 @@ services:
     group_add:
       - dialout
       - video
-    devices:
-      - /dev/ttyACM0:/dev/ttyACM0
+    # devices:
+    #   - /dev/ttyACM0:/dev/ttyACM0
