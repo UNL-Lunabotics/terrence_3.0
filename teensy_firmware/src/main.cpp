@@ -31,30 +31,49 @@ void loop() {
 
     switch (command_type)
     {
-        case 'f':
+        case 'f':  // forward (input: f v[0,127])
             uint8_t v; sscanf(c_str_command, "%u", &v);
-            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :  FORWARD <= %d\n", v);
+            Serial.printf("[CMD]: Received DT :  FORWARD <= %d\n", v);
             drivetrain_roboclaw.ForwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
             break;
         
-        case 'b':
+        case 'b':  // backwards (input: 'b' v[0,127])
             uint8_t v; sscanf(c_str_command, "%u", &v);
-            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND : BACKWARD <= %d\n", v);
+            Serial.printf("[CMD]: Received DT : BACKWARD <= %d\n", v);
             drivetrain_roboclaw.BackwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
             break;
         
-        case 'l':
+        case 'l': // left (input: 'l' v[0,127])
             uint8_t v; sscanf(c_str_command, "%u", &v);
-            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :     LEFT <= %d\n", v);
+            Serial.printf("[CMD]: Received DT :     LEFT <= %d\n", v);
             drivetrain_roboclaw.TurnLeftMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
             break;
         
-        case 'r':
+        case 'r':  // right (input: 'r' v[0,127])
             uint8_t v; sscanf(c_str_command, "%u", &v);
-            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :    RIGHT <= %d\n", v);
+            Serial.printf("[CMD]: Received DT :    RIGHT <= %d\n", v);
             drivetrain_roboclaw.TurnRightMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
             break;
+
+        case 'h':  // hopper (input: 'h' p[0,1]) hold <- 0, dump <- 1
+            uint8_t p; sscanf(c_str_command, "%u", &p);
+            Serial.printf("[CMD]: Received H  : %s", (p) ? "DUMP" : "HOLD");
+            // move hopper servo
+            break;
         
+        case 'e':  // execavation (input 'e' p[0,1]) up <- 0, down <- 1
+            uint8_t p; sscanf(c_str_command, "%u", &p);
+            Serial.printf("[CMD]: Received E  : %s", (p) ? "DOWN" : "UP");
+            // execavation_roboclaw.SpeedAccelDeccelPositionM1(
+            //     EXECAVATION_ROBOCLAW_ADDRESS,
+            //     10000, // accel (counts/sec^2)
+            //     5000, // speed (counts/sec)
+            //     10000, // deccel (counts/sec^2)
+            //     20000, // target position (encoder counts)
+            //     1 // buffer (1 = start immediately)
+            // );
+            break;
+
         default:
             break;
     }
