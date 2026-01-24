@@ -4,14 +4,6 @@ import os
 
 package_name = 'description'
 
-def package_files(directory):
-    """Recursively collect files for installation preserving subfolders."""
-    paths = []
-    for (path, _, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join(path, filename))
-    return paths
-
 setup(
     name=package_name,
     version='0.0.0',
@@ -20,8 +12,8 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join("share", package_name, "urdf"), package_files("urdf")),
-        (os.path.join("share", package_name, "meshes"), package_files("meshes")),
+        (os.path.join("share", package_name, "urdf"), glob("urdf/*")),
+        (os.path.join("share", package_name, "meshes"), glob("meshes/*")),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
