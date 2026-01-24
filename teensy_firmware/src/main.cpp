@@ -17,9 +17,7 @@ void setup() {
     Serial.begin(57600);
     execavation_roboclaw.begin(115200);
     drivetrain_roboclaw.begin(115200);
-    drivetrain_roboclaw.ForwardBackwardM1(DRIVETRAIN_ROBOCLAW_ADDRESS, 60);
-    drivetrain_roboclaw.ForwardBackwardM2(DRIVETRAIN_ROBOCLAW_ADDRESS, 60);
-    execavation_roboclaw.ForwardBackwardM1(EXECAVATION_ROBOCLAW_ADDRESS, 60);
+    drivetrain_roboclaw.ForwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, 0);
 }
 
 void loop() {
@@ -33,23 +31,27 @@ void loop() {
 
     switch (command_type)
     {
-        case 'm':
-            int left_velocity, right_velocity;
-            sscanf(c_str_command, "%d %d", &left_velocity, &right_velocity);
-            Serial.printf("Recieved left %d right %d\n", left_velocity, right_velocity);
-            drivetrain_roboclaw.ForwardBackwardM1(DRIVETRAIN_ROBOCLAW_ADDRESS, left_velocity);
-            execavation_roboclaw.ForwardBackwardM2(EXECAVATION_ROBOCLAW_ADDRESS, left_velocity);
-
-            drivetrain_roboclaw.ForwardBackwardM1(DRIVETRAIN_ROBOCLAW_ADDRESS, right_velocity);
-            break;
-
-        case 'u':
-            int k_p, k_d, k_i, k_o;
-            sscanf(c_str_command, "%d:%d:%d:%d", &k_p, &k_d, &k_i, &k_o);
-            break;
-
+        case 'f':
+            uint8_t v; sscanf(c_str_command, "%u", &v);
+            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :  FORWARD <= %d\n", v);
+            drivetrain_roboclaw.ForwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+        
+        case 'b':
+            uint8_t v; sscanf(c_str_command, "%u", &v);
+            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND : BACKWARD <= %d\n", v);
+            drivetrain_roboclaw.BackwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+        
+        case 'l':
+            uint8_t v; sscanf(c_str_command, "%u", &v);
+            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :     LEFT <= %d\n", v);
+            drivetrain_roboclaw.TurnLeftMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+        
+        case 'r':
+            uint8_t v; sscanf(c_str_command, "%u", &v);
+            Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :    RIGHT <= %d\n", v);
+            drivetrain_roboclaw.TurnRightMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+        
         default:
             break;
     }
 }
-
