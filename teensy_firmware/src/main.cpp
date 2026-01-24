@@ -35,21 +35,25 @@ void loop() {
             uint8_t v; sscanf(c_str_command, "%u", &v);
             Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :  FORWARD <= %d\n", v);
             drivetrain_roboclaw.ForwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+            break;
         
         case 'b':
             uint8_t v; sscanf(c_str_command, "%u", &v);
             Serial.printf("[LOG]: RECEIVED MOTOR COMMAND : BACKWARD <= %d\n", v);
             drivetrain_roboclaw.BackwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+            break;
         
         case 'l':
             uint8_t v; sscanf(c_str_command, "%u", &v);
             Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :     LEFT <= %d\n", v);
             drivetrain_roboclaw.TurnLeftMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+            break;
         
         case 'r':
             uint8_t v; sscanf(c_str_command, "%u", &v);
             Serial.printf("[LOG]: RECEIVED MOTOR COMMAND :    RIGHT <= %d\n", v);
             drivetrain_roboclaw.TurnRightMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, v);
+            break;
         
         default:
             break;
