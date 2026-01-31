@@ -54,7 +54,7 @@ public:
   }
 
 
-  std::string send_msg(const std::string &msg_to_send, bool print_output = false)
+  std::string send_msg(const std::string &msg_to_send/*, bool print_output = false*/)
   {
     serial_conn_.FlushIOBuffers(); // Just in case
     serial_conn_.Write(msg_to_send);
@@ -76,7 +76,7 @@ public:
     //   std::cout << "Sent: " << msg_to_send << " Recv: " << response << std::endl;
     // }
 
-    return;
+    return msg_to_send;
   }
 
 
