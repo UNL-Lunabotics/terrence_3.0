@@ -15,19 +15,19 @@ RoboClaw drivetrain_roboclaw(&Serial3, 10000);
 
 void setup() {
     Serial.begin(57600);
+    Serial.setTimeout(20); // ms
     execavation_roboclaw.begin(115200);
     drivetrain_roboclaw.begin(115200);
     drivetrain_roboclaw.ForwardMixed(DRIVETRAIN_ROBOCLAW_ADDRESS, 0);
 }
 
 void loop() {
-
-    while (Serial.available() == 0);  // wait for data
-    String command = Serial.readString();  // read until timeout
+    if (!Serial.available()) return;
+    String command = Serial.readStringUntil('\n');  // read until timeout
     command.trim();  // remove tailing whitespace
+    if (command.length() < 1) return;
 
     const char command_type = command.charAt(0);
-    const char* c_str_command = command.c_str() + (sizeof(char) * 2);  // skip the command letter and space
 
     switch (command_type)
     {

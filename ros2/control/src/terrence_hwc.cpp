@@ -107,8 +107,10 @@ namespace terrence_hwc {
             return hardware_interface::CallbackReturn::ERROR;
         }
 
-        left_pos_ = right_pos_ = 0.0;
-        left_vel_state_ = right_vel_state_ = 0.0;
+        left_pos_ = 0.0;
+        right_pos_ = 0.0;
+        left_vel_state_ = 0.0;
+        right_vel_state_ = 0.0;
 
         set_state(left_pos_if_, left_pos_);
         set_state(right_pos_if_, right_pos_);
@@ -139,6 +141,10 @@ namespace terrence_hwc {
 
         // NOTE: Open loop odometry since no encoders
 
+        // safeguard against NaN
+        const double dt = period.seconds();
+        const double dt_safe = (std::isfinite(dt) && dt > 0.0 && dt < 0.5) ? dt : 0.0;
+
         // Open-loop: assume measured wheel velocity equals commanded wheel velocity
         const double left_cmd  = get_command<double>(left_vel_if_);
         const double right_cmd = get_command<double>(right_vel_if_);
@@ -146,12 +152,8 @@ namespace terrence_hwc {
         left_vel_state_  = left_cmd;
         right_vel_state_ = right_cmd;
 
-        const double dt = period.seconds();
-        if (dt > 0.0 && std::isfinite(dt))
-        {
-            left_pos_  += left_vel_state_  * dt;
-            right_pos_ += right_vel_state_ * dt;
-        }
+        left_pos_  = finite_or_zero(left_pos_  + left_vel_state_  * dt_safe);
+        right_pos_ = finite_or_zero(right_pos_ + right_vel_state_ * dt_safe);
 
         // Publish state into ros2_control-managed handles
         set_state(left_vel_if_, left_vel_state_);
@@ -170,8 +172,9 @@ namespace terrence_hwc {
             return hardware_interface::return_type::ERROR;
         }
 
-        const double left_cmd  = get_command<double>(left_vel_if_);
-        const double right_cmd = get_command<double>(right_vel_if_);
+        // get the rad/s velocity commands from ros2 control
+        double left_cmd  = finite_or_zero(get_command<double>(left_vel_if_));
+        double right_cmd = finite_or_zero(get_command<double>(right_vel_if_));
 
         comms_.set_motor_values(left_cmd, right_cmd);
 

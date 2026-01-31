@@ -31,6 +31,7 @@ namespace terrence_hwc
             std::string device = "";
             int baud_rate = 0;
             int timeout_ms = 0;
+            double max_radps = 0.0;
             int pid_p = 0;
             int pid_d = 0;
             int pid_i = 0;
@@ -62,6 +63,12 @@ namespace terrence_hwc
             
             hardware_interface::return_type write(
                 const rclcpp::Time & time, const rclcpp::Duration & period) override;
+            
+            // util
+            static inline double finite_or_zero(double x) {
+                // checks to see if a double is finite, if it isn't, set to 0 to guard against NaN
+                return std::isfinite(x) ? x : 0.0;
+            }
         
         private:
             ArduinoComms comms_;
