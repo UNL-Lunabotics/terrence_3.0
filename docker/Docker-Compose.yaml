@@ -1,4 +1,3 @@
-# This is the base compose file. GPU specifications will be overriden by others
 name: terrence_3.0
 services:
   terrence_3.0:
@@ -25,19 +24,12 @@ services:
         target: /workspaces/terrence_3.0
         # bind:
         #   propagation: rshared
-      # - type: bind
-      #   source: /dev/input
-      #   target: /dev/input
-      #   bind:
-      #     propagation: rshared
-      - type: bind
-        source: /dev/bus/usb
-        target: /dev/bus/usb
-        bind:
-          propagation: rshared
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - type: bind
+        source: /dev/serial/by-id
+        target: /dev/serial/by-id
+        read_only: true
+      - /dev:/dev
     cap_add:
       - SYS_NICE               # For real-time scheduling
     tty: true

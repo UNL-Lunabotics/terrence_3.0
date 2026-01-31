@@ -75,6 +75,10 @@ RUN apt-get update && \
     echo "$USERNAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME && \
     chmod 0440 /etc/sudoers.d/$USERNAME
 
+# Fedora host serial devices use GID 18 (I hate it here)
+RUN groupadd -g 18 hostserial || true \
+ && usermod -aG hostserial ubuntu
+
 # Switch from root to user
 USER $USERNAME
 WORKDIR /workspaces/terrence_3.0/
