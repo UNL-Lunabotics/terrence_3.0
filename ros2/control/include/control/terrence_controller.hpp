@@ -8,6 +8,10 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <std_srvs/srv/trigger.hpp>
+#include <nav_msgs/msg/odometry.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <realtime_tools/realtime_publisher.hpp>
 
 #include <string>
 #include <cmath>
@@ -87,6 +91,10 @@ namespace terrence_controller
             rclcpp::Subscription<std_msgs::msg::String>::SharedPtr set_mode_sub_;
             rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_fault_srv_;
 
+            // ROS publishers
+            std::shared_ptr<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>> odom_pub_rt_;
+            std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+
             // Params
             std::string left_joint_name_{"DS_Joint"};
             std::string right_joint_name_{"PS_Joint"};
@@ -130,7 +138,14 @@ namespace terrence_controller
             void computeWheelRadps(double v_mps, double w_radps,
                                 double & out_left, double & out_right) const;
             
-            // Maybe put debug/status publishing here later
+            // Odom and transform stuff
+            std::string odom_topic_{"/odom"};
+            std::string odom_frame_id_{"odom"};
+            std::string base_frame_id_{"base_link"};
+            bool publish_odom_tf_{true};
+            double x_{0.0};
+            double y_{0.0};
+            double yaw_{0.0};
     };
 } // namespace terrence_controller
 

@@ -39,7 +39,7 @@ namespace terrence_controller
         try
         {
             auto_declare<std::string>("left_joint_name", "DS_Joint");
-            auto_declare<std::string>("right_joint_name", "PS_JOINT");
+            auto_declare<std::string>("right_joint_name", "PS_Joint");
 
             auto_declare<double>("wheel_radius_m", 0.085);
             auto_declare<double>("wheel_separation_m", 0.42);
@@ -47,6 +47,11 @@ namespace terrence_controller
             auto_declare<double>("max_wheel_radps", 10.0);
             auto_declare<double>("cmd_timeout_s", 0.25);
             auto_declare<double>("moving_eps_radps", 0.05);
+
+            auto_declare<std::string>("odom_topic", "/odom");
+            auto_declare<std::string>("odom_frame_id", "odom");
+            auto_declare<std::string>("base_frame_id", "base_link");
+            auto_declare<bool>("publish_odom_tf", true);
         }
         catch(const std::exception& e)
         {
@@ -95,6 +100,11 @@ namespace terrence_controller
         cmd_timeout_s_ = get_node()->get_parameter("cmd_timeout_s").as_double();
         moving_eps_radps_ = get_node()->get_parameter("moving_eps_radps").as_double();
 
+        odom_topic_ = get_node()->get_parameter("odom_topic").as_string();
+        odom_frame_id_ = get_node()->get_parameter("odom_frame_id").as_string();
+        base_frame_id_ = get_node()->get_parameter("base_frame_id").as_string();
+        publish_odom_tf_ = get_node()->get_parameter("publish_odom_tf").as_bool();
+
         // Initialize the realtime buffers
         rt_cmd_vel_.writeFromNonRT(CmdVel{0.0, 0.0, get_node()->now(), false});
         rt_dig_cmd_.writeFromNonRT(DigCmd{});
@@ -124,6 +134,13 @@ namespace terrence_controller
                 resp->message = "Fault cleared; mode set to IDLE.";
             });
         
+        // ROS publishers
+        odom_pub_rt_ = std::make_shared<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>>(
+            get_node(), odom_topic_, rclcpp::SystemDefaultsQoS());
+
+        tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(get_node());
+
+        
         mode_ = Mode::IDLE;
         fault_latched_ = false;
 
@@ -140,6 +157,10 @@ namespace terrence_controller
         left_cmd_idx_ = right_cmd_idx_ = -1;
         left_pos_state_idx_ = left_vel_state_idx_ = -1;
         right_pos_state_idx_ = right_vel_state_idx_ = -1;
+
+        x_ = 0.0;
+        y_ = 0.0;
+        yaw_ = 0.0;
 
         for (size_t i = 0; i < command_interfaces_.size(); ++i)
         {
@@ -358,7 +379,7 @@ namespace terrence_controller
     }
 
     // THE UPDATE FUNCTION
-    controller_interface::return_type TerrenceController::update(const rclcpp::Time & time, const rclcpp::Duration &)
+    controller_interface::return_type TerrenceController::update(const rclcpp::Time & time, const rclcpp::Duration & period)
     {
         // If fault latched, enforce safe outputs
         if (fault_latched_ || mode_ == Mode::FAULT)
@@ -446,7 +467,86 @@ namespace terrence_controller
             }
         }
 
-        // maybe open loop odom here?
+        // Open loop odom
+        double wl = 0.0, wr = 0.0;
+        if (left_vel_state_idx_ >= 0 && right_vel_state_idx_ >= 0)
+        {
+            wl = state_interfaces_[left_vel_state_idx_].get_optional().value_or(0.0);
+            wr = state_interfaces_[right_vel_state_idx_].get_optional().value_or(0.0);
+        }
+        else
+        {
+            wl = command_interfaces_[left_cmd_idx_].get_optional().value_or(0.0);
+            wr = command_interfaces_[right_cmd_idx_].get_optional().value_or(0.0);
+        }
+
+        const double dt_raw = period.seconds();
+        const double dt = (std::isfinite(dt_raw) && dt_raw > 0.0 && dt_raw < 0.5) ? dt_raw : 0.0;
+
+        // Convert wheel angular velocity (rad/s) to linear (m/s)
+        const double vl = wl * wheel_radius_m_;
+        const double vr = wr * wheel_radius_m_;
+
+        // Body-frame velocities
+        const double v = 0.5 * (vr + vl);
+        const double wz = (wheel_separation_m_ > 1e-6) ? ((vr - vl) / wheel_separation_m_) : 0.0;
+
+        // Integrate pose
+        yaw_ += wz * dt;
+
+        // Optional: wrap yaw to [-pi, pi] to avoid unbounded growth
+        while (yaw_ > M_PI)  yaw_ -= 2.0 * M_PI;
+        while (yaw_ < -M_PI) yaw_ += 2.0 * M_PI;
+
+        x_ += v * std::cos(yaw_) * dt;
+        y_ += v * std::sin(yaw_) * dt;
+
+        // yaw -> quaternion (2D)
+        const double cy = std::cos(yaw_ * 0.5);
+        const double sy = std::sin(yaw_ * 0.5);
+
+        // Publish odom
+        if (odom_pub_rt_ && odom_pub_rt_->trylock())
+        {
+            auto & msg = odom_pub_rt_->msg_;
+            msg.header.stamp = time;
+            msg.header.frame_id = odom_frame_id_;
+            msg.child_frame_id = base_frame_id_;
+
+            msg.pose.pose.position.x = x_;
+            msg.pose.pose.position.y = y_;
+            msg.pose.pose.position.z = 0.0;
+
+            msg.pose.pose.orientation.x = 0.0;
+            msg.pose.pose.orientation.y = 0.0;
+            msg.pose.pose.orientation.z = sy;
+            msg.pose.pose.orientation.w = cy;
+
+            msg.twist.twist.linear.x = v;
+            msg.twist.twist.linear.y = 0.0;
+            msg.twist.twist.angular.z = wz;
+
+            odom_pub_rt_->unlockAndPublish();
+        }
+
+        // Publish TF odom->base
+        if (publish_odom_tf_ && tf_broadcaster_)
+        {
+            geometry_msgs::msg::TransformStamped tf;
+            tf.header.stamp = time;
+            tf.header.frame_id = odom_frame_id_;
+            tf.child_frame_id = base_frame_id_;
+            tf.transform.translation.x = x_;
+            tf.transform.translation.y = y_;
+            tf.transform.translation.z = 0.0;
+            tf.transform.rotation.x = 0.0;
+            tf.transform.rotation.y = 0.0;
+            tf.transform.rotation.z = sy;
+            tf.transform.rotation.w = cy;
+
+            tf_broadcaster_->sendTransform(tf);
+        }
+
         return controller_interface::return_type::OK;
     }
 

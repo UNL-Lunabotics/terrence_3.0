@@ -62,7 +62,12 @@ def generate_launch_description():
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=["joint_state_broadcaster"],
+                arguments=["joint_state_broadcaster", "--activate"],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["terrence_controller", "--activate"],
             ),
         ]
     )
