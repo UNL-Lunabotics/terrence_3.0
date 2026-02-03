@@ -135,8 +135,11 @@ namespace terrence_controller
             });
         
         // ROS publishers
+        auto odom_pub = get_node()->create_publisher<nav_msgs::msg::Odometry>(
+            odom_topic_, rclcpp::SystemDefaultsQoS());
+
         odom_pub_rt_ = std::make_shared<realtime_tools::RealtimePublisher<nav_msgs::msg::Odometry>>(
-            get_node(), odom_topic_, rclcpp::SystemDefaultsQoS());
+            odom_pub);
 
         tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(get_node());
 

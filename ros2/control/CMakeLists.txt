@@ -15,6 +15,9 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   geometry_msgs
   std_msgs
   std_srvs
+  nav_msgs
+  tf2
+  tf2_ros
 )
 
 # find dependencies
@@ -88,6 +91,9 @@ ament_target_dependencies(
   geometry_msgs
   std_msgs
   std_srvs
+  nav_msgs
+  tf2
+  tf2_ros
 )
 
 pluginlib_export_plugin_description_file(controller_interface config/terrence_controller.xml)
