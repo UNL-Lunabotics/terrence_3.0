@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <optional>
-#include <iostream> // todo get rid of this
 
 #include <pluginlib/class_list_macros.hpp>
 
@@ -41,6 +40,8 @@ namespace terrence_controller
         {
             auto_declare<std::string>("left_joint_name", "DS_Joint");
             auto_declare<std::string>("right_joint_name", "PS_Joint");
+            auto_declare<std::string>("loader_joint_name", "LoaderJoint");
+            auto_declare<std::string>("hopper_joint_name", "HopperJoint");
 
             auto_declare<double>("wheel_radius_m", 0.085);
             auto_declare<double>("wheel_separation_m", 0.42);
@@ -68,7 +69,9 @@ namespace terrence_controller
         config.type = controller_interface::interface_configuration_type::INDIVIDUAL;
         config.names = {
             left_joint_name_ + "/velocity",
-            right_joint_name_ + "/velocity"
+            right_joint_name_ + "/velocity",
+            loader_joint_name_ + "/position",
+            hopper_joint_name_ + "/position"
         };
 
         return config;
@@ -83,7 +86,9 @@ namespace terrence_controller
             left_joint_name_ + "/position",
             left_joint_name_ + "/velocity",
             right_joint_name_ + "/position",
-            right_joint_name_ + "/velocity"
+            right_joint_name_ + "/velocity",
+            loader_joint_name_ + "/position",
+            hopper_joint_name_ + "/position"
         };
 
         return config;
@@ -93,6 +98,8 @@ namespace terrence_controller
     {
         left_joint_name_ = get_node()->get_parameter("left_joint_name").as_string();
         right_joint_name_ = get_node()->get_parameter("right_joint_name").as_string();
+        loader_joint_name_ = get_node()->get_parameter("loader_joint_name").as_string();
+        hopper_joint_name_ = get_node()->get_parameter("hopper_joint_name").as_string();
 
         wheel_radius_m_ = get_node()->get_parameter("wheel_radius_m").as_double();
         wheel_separation_m_ = get_node()->get_parameter("wheel_separation_m").as_double();
@@ -159,8 +166,11 @@ namespace terrence_controller
     {
         // Cache interface indices
         left_cmd_idx_ = right_cmd_idx_ = -1;
+        loader_cmd_idx_ = hopper_cmd_idx_ = -1;
+
         left_pos_state_idx_ = left_vel_state_idx_ = -1;
         right_pos_state_idx_ = right_vel_state_idx_ = -1;
+        loader_pos_state_idx_ = hopper_pos_state_idx_ = -1;
 
         x_ = 0.0;
         y_ = 0.0;
@@ -169,25 +179,30 @@ namespace terrence_controller
         for (size_t i = 0; i < command_interfaces_.size(); ++i)
         {
             const auto & ci = command_interfaces_[i];
-            if (ci.get_prefix_name() == left_joint_name_ && ci.get_interface_name() == "velocity") 
-                left_cmd_idx_ = static_cast<int>(i);
-            if (ci.get_prefix_name() == right_joint_name_ && ci.get_interface_name() == "velocity")
-                right_cmd_idx_ = static_cast<int>(i);
+            const auto & jn = ci.get_prefix_name(); // joint name
+            const auto & in = ci.get_interface_name(); // interface name
+
+            if (jn == left_joint_name_ && in == "velocity") left_cmd_idx_ = (int)i;
+            if (jn == right_joint_name_ && in == "velocity") right_cmd_idx_ = (int)i;
+            if (jn == loader_joint_name_ && in == "position") loader_cmd_idx_ = (int)i;
+            if (jn == hopper_joint_name_ && in == "position") hopper_cmd_idx_ = (int)i;
         }
 
         for (size_t i = 0; i < state_interfaces_.size(); ++i)
         {
             const auto & si = state_interfaces_[i];
-            const auto & jn = si.get_name(); // Joint name
-            const auto & in = si.get_interface_name();
+            const auto & jn = si.get_prefix_name(); // joint name
+            const auto & in = si.get_interface_name(); // interface name
 
-            if (jn == left_joint_name_ && in == "position") left_pos_state_idx_ = static_cast<int>(i);
-            if (jn == left_joint_name_ && in == "velocity") left_vel_state_idx_ = static_cast<int>(i);
-            if (jn == right_joint_name_ && in == "position") right_pos_state_idx_ = static_cast<int>(i);
-            if (jn == right_joint_name_ && in == "velocity") right_vel_state_idx_ = static_cast<int>(i);
+            if (jn == left_joint_name_ && in == "position") left_pos_state_idx_ = (int)i;
+            if (jn == left_joint_name_ && in == "velocity") left_vel_state_idx_ = (int)i;
+            if (jn == right_joint_name_ && in == "position") right_pos_state_idx_ = (int)i;
+            if (jn == right_joint_name_ && in == "velocity") right_vel_state_idx_ = (int)i;
+            if (jn == loader_joint_name_ && in == "position") loader_pos_state_idx_ = (int)i;
+            if (jn == hopper_joint_name_ && in == "position") hopper_pos_state_idx_ = (int)i;
         }
 
-        if (left_cmd_idx_ < 0 || right_cmd_idx_ < 0)
+        if (left_cmd_idx_ < 0 || right_cmd_idx_ < 0 || loader_cmd_idx_ < 0 || hopper_cmd_idx_ < 0)
         {
             RCLCPP_ERROR(get_node()->get_logger(),
                  "Missing command interfaces. Need %s/velocity and %s/velocity.",
@@ -204,6 +219,8 @@ namespace terrence_controller
 
         // Safety outputs
         setWheelCommandsRadps(0.0, 0.0);
+        loader_cmd_val_ = 0.0;
+        hopper_cmd_val_ = 0.0;
         enterMode(Mode::IDLE);
 
         RCLCPP_INFO(get_node()->get_logger(), "Activated TerrenceController.");
@@ -421,7 +438,8 @@ namespace terrence_controller
             case Mode::IDLE:
             {
                 setWheelCommandsRadps(0.0, 0.0);
-                // TODO: attachment logic
+                loader_cmd_val_ = stowed_loader_cmd_val_;
+                hopper_cmd_val_ = stowed_hopper_cmd_val_;
                 break;
             }
 
@@ -441,8 +459,9 @@ namespace terrence_controller
                 computeWheelRadps(cmd.linear_x, cmd.angular_z, wl, wr);
                 setWheelCommandsRadps(wl, wr);
 
-                // Interlock: do NOT dig while driving
-                // TODO: attachment logic
+                // Interlock: do NOT dig while driving, set to stowed
+                loader_cmd_val_ = stowed_loader_cmd_val_;
+                hopper_cmd_val_ = stowed_hopper_cmd_val_;
 
                 break;
             }
@@ -451,15 +470,25 @@ namespace terrence_controller
             {
                 setWheelCommandsRadps(0.0, 0.0);
                 const auto dig = *rt_dig_cmd_.readFromRT();
-                (void)dig;
-                // TODO: attachment logic
+                if (dig.valid)
+                {
+                    // [0] = Loader, [1] = Hopper
+                    if (dig.len >= 1) loader_cmd_val_ = dig.data[0];
+                    if (dig.len >= 2) hopper_cmd_val_ = dig.data[1];
+                }
                 break;
             }
 
             case Mode::DUMP:
             {
                 setWheelCommandsRadps(0.0, 0.0);
-                //TODO: attachment logic
+                const auto dig = *rt_dig_cmd_.readFromRT();
+                if (dig.valid)
+                {
+                    // [0] = Loader, [1] = Hopper
+                    if (dig.len >= 1) loader_cmd_val_ = dig.data[0];
+                    if (dig.len >= 2) hopper_cmd_val_ = dig.data[1];
+                }
                 break;
             }
 
@@ -470,6 +499,10 @@ namespace terrence_controller
                 break;
             }
         }
+
+        // Write commands to interfaces
+        (void)command_interfaces_[loader_cmd_idx_].set_value(loader_cmd_val_);
+        (void)command_interfaces_[hopper_cmd_idx_].set_value(hopper_cmd_val_);
 
         // Open loop odom
         double wl = 0.0, wr = 0.0;

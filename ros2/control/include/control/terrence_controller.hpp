@@ -98,6 +98,8 @@ namespace terrence_controller
             // Params
             std::string left_joint_name_{"DS_Joint"};
             std::string right_joint_name_{"PS_Joint"};
+            std::string loader_joint_name_{"LoaderJoint"};
+            std::string hopper_joint_name_{"HopperJoint"};
 
             double wheel_radius_m_{0.085};
             double wheel_separation_m_{0.42};
@@ -113,11 +115,22 @@ namespace terrence_controller
             // Cached indices for update()
             int left_cmd_idx_{-1};
             int right_cmd_idx_{-1};
+            int loader_cmd_idx_{-1};
+            int hopper_cmd_idx_{-1};
 
             int left_pos_state_idx_{-1};
             int left_vel_state_idx_{-1};
             int right_pos_state_idx_{-1};
             int right_vel_state_idx_{-1};
+            int loader_pos_state_idx_{-1};
+            int hopper_pos_state_idx_{-1};
+
+            double loader_cmd_val_{0.0};
+            double hopper_cmd_val_{0.0};
+
+            // TODO: Replace these with real values
+            double stowed_loader_cmd_val_{0.0};
+            double stowed_hopper_cmd_val_{0.0};
 
             // Helper functions (cb = callback)
             // Keep as much processing out of update as possible by giving it to other functions

@@ -29,7 +29,7 @@
                 <state_interface name="velocity"/>
             </joint>
 
-            <!-- <joint name="LoaderJoint">
+            <joint name="LoaderJoint">
                 <command_interface name="position"/>
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
@@ -39,10 +39,6 @@
                 <command_interface name="position"/>
                 <state_interface name="position"/>
             </joint>
-
-            <joint name="DoorJoint">
-                <state_interface name="position"/>
-            </joint> -->
         </ros2_control>
     </xacro:unless>
 
