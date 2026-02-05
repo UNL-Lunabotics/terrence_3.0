@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <optional>
+#include <iostream> // todo get rid of this
 
 #include <pluginlib/class_list_macros.hpp>
 
@@ -168,9 +169,9 @@ namespace terrence_controller
         for (size_t i = 0; i < command_interfaces_.size(); ++i)
         {
             const auto & ci = command_interfaces_[i];
-            if (ci.get_name() == left_joint_name_ && ci.get_interface_name() == "velocity")
+            if (ci.get_prefix_name() == left_joint_name_ && ci.get_interface_name() == "velocity") 
                 left_cmd_idx_ = static_cast<int>(i);
-            if (ci.get_name() == right_joint_name_ && ci.get_interface_name() == "velocity")
+            if (ci.get_prefix_name() == right_joint_name_ && ci.get_interface_name() == "velocity")
                 right_cmd_idx_ = static_cast<int>(i);
         }
 
