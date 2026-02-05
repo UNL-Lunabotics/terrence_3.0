@@ -27,6 +27,9 @@ namespace terrence_hwc
         {
             std::string left_wheel_name = "";
             std::string right_wheel_name = "";
+            std::string loader_name = "LoaderJoint";
+            std::string hopper_name = "HopperJoint";
+
             float loop_rate = 0.0;
             std::string device = "";
             int baud_rate = 0;
@@ -77,10 +80,17 @@ namespace terrence_hwc
             std::string right_vel_if_;
             std::string left_pos_if_;
             std::string right_pos_if_;
+            std::string loader_cmd_if_;
+            std::string loader_pos_if_;
+            std::string hopper_cmd_if_;
+            std::string hopper_pos_if_;
+
             double left_pos_{0.0};
             double right_pos_{0.0};
             double left_vel_state_{0.0};
             double right_vel_state_{0.0};
+            double loader_pos_{0.0};
+            double hopper_pos_{0.0};
     };
 }   // namespace terrence_hwc
 
