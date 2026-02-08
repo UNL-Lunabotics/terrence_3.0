@@ -24,6 +24,14 @@ def generate_launch_description():
         ),
         launch_arguments={'gz_args': '-r ros2/description/worlds/empty.sdf'}.items(),
     )
+    
+    # # 1. Start environment (Bullet Featherstone)
+    # gazebo = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource(
+    #         [PathSubstitution(FindPackageShare("ros_gz_sim")), "/launch/gz_sim.launch.py"]
+    #     ),
+    #     launch_arguments={'gz_args': '-r ros2/description/worlds/empty_bullet_featherstone.sdf --physics-engine gz-physics-bullet-featherstone-plugin'}.items(),
+    # )
 
     # 2. Robot State Publisher
     robot_description_content = Command(

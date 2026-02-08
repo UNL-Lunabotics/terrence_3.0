@@ -64,16 +64,6 @@
                 <state_interface name="velocity"/>
                 <state_interface name="position"/>
             </joint>
-            
-            <joint name="DW_Joint">
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-            </joint>
-
-            <joint name="PW_Joint">
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-            </joint>
 
             <joint name="LoaderJoint">
                 <state_interface name="position"/>
