@@ -38,11 +38,6 @@ void loop() {
             sscanf(c_str_command, "%d %d", &left_velocity, &right_velocity);
             // Serial.printf("Recieved left %d right %d\n", left_velocity, right_velocity);
 
-            // temp hardcode
-            left_velocity = 80;
-            right_velocity = 80;
-
-
             if (left_velocity + right_velocity != 128) {
                 digitalWrite(LED_BUILTIN, HIGH);
             }
