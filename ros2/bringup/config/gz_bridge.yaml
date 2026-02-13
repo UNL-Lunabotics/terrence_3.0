@@ -5,45 +5,37 @@
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
 
-# 2. Command Velocity (Input)
-# Bridges ROS /cmd_vel to Gazebo /cmd_vel (useful for debugging or non-ros2_control plugins)
-- ros_topic_name: "cmd_vel"
-  gz_topic_name: "cmd_vel"
-  ros_type_name: "geometry_msgs/msg/Twist"
-  gz_type_name: "gz.msgs.Twist"
-  direction: ROS_TO_GZ
+# REMOVE CMD_VEL
+# ros2_control listens to the ROS topic /cmd_vel directly and moves the joints.
+# You do not need to bridge this to Gazebo unless you are debugging.
 
-# 3. Sensors (Lidar)
+# 3. Sensors (Lidar) - KEEP THIS
 - ros_topic_name: "scan"
   gz_topic_name: "scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
-# 4. Sensors (Camera Info)
+# 4. Sensors (Camera Info) - KEEP THIS
 - ros_topic_name: "camera/camera_info"
   gz_topic_name: "camera/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-# 5. Sensors (Camera Image)
+# 5. Sensors (Camera Image) - KEEP THIS
 - ros_topic_name: "camera/image_raw"
   gz_topic_name: "camera/image_raw"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
 
-# 6. Odometry (Ground Truth from Sim)
-- ros_topic_name: "odom"
-  gz_topic_name: "odom"
-  ros_type_name: "nav_msgs/msg/Odometry"
-  gz_type_name: "gz.msgs.Odometry"
-  direction: GZ_TO_ROS
+# REMOVE ODOMETRY
+# Your diff_drive_controller is already publishing this to /odom.
+# Bridging it here causes interference.
 
-# 7. TF (Ground Truth from Sim)
-- ros_topic_name: "tf"
-  gz_topic_name: "tf"
-  ros_type_name: "tf2_msgs/msg/TFMessage"
-  gz_type_name: "gz.msgs.Pose_V"
-  direction: GZ_TO_ROS
+# REMOVE TF
+# Your diff_drive_controller publishes odom -> base_link
+# Your robot_state_publisher publishes base_link -> laser_frame
+# SLAM Toolbox will publish map -> odom
+# Bridging TF from Gazebo will break this chain.

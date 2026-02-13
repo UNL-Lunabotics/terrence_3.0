@@ -9,6 +9,11 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     
+    # pkg_bringup = FindPackageShare("bringup")
+    # pkg_ros_gz_sim = FindPackageShare("ros_gz_sim")
+    pkg_slam_toolbox = FindPackageShare("slam_toolbox")
+    pkg_nav2_bringup = FindPackageShare("nav2_bringup")
+    
     # Locate the config file
     # Ensure 'bringup' matches your actual package name where the yaml is stored
     bridge_params = os.path.join(
@@ -122,6 +127,26 @@ def generate_launch_description():
             on_exit=[joint_state_broadcaster_spawner],
         )
     )
+    
+    # Calculates the map -> odom transform
+    slam_toolbox = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [PathSubstitution(FindPackageShare("slam_toolbox")), "/launch/online_async_launch.py"]
+        ),
+        launch_arguments={'use_sim_time': 'true'}.items(),
+    )
+
+    # --- Nav2 Bringup ---
+    # Launches the navigation stack (planner, controller, behavior trees)
+    nav2_bringup = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [PathSubstitution(FindPackageShare("nav2_bringup")), "/launch/navigation_launch.py"]
+        ),
+        launch_arguments={
+            'use_sim_time': 'true',
+            'params_file': PathSubstitution([FindPackageShare("nav2_bringup"), 'params', 'nav2_params.yaml'])
+        }.items(),
+    )
 
     return LaunchDescription([
         gazebo,
@@ -132,4 +157,6 @@ def generate_launch_description():
         teleop_node,
         delay_joint_state_broadcaster_spawner,
         delay_terrence_controller_spawner,
+        slam_toolbox,
+        nav2_bringup,
     ])

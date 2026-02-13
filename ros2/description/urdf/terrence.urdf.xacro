@@ -11,7 +11,7 @@
   <xacro:include filename="lidar.xacro"/>
 
   <!-- CAMERA -->
-  <!-- <xacro:include filename="camera.xacro"/> -->
+  <xacro:include filename="camera.xacro"/>
 
   <link name="base_link" />
   <link name="base_footprint" />
