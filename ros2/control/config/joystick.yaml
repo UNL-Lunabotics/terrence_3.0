@@ -9,6 +9,8 @@ teleop_twist_joy_node:
     scale_angular:
       yaw: 1.0
 
+    deadzone: 0.5
+
     enable_button: 4
     enable_turbo_button: 5
     
