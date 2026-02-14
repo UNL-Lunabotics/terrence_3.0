@@ -22,7 +22,7 @@ def generate_launch_description():
         "gz_bridge.yaml"
     )
 
-    # 1. Start environment
+    # Start environment
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [PathSubstitution(FindPackageShare("ros_gz_sim")), "/launch/gz_sim.launch.py"]
@@ -38,7 +38,7 @@ def generate_launch_description():
     #     launch_arguments={'gz_args': '-r ros2/description/worlds/empty_bullet_featherstone.sdf --physics-engine gz-physics-bullet-featherstone-plugin'}.items(),
     # )
 
-    # 2. Robot State Publisher
+    # Robot State Publisher
     robot_description_content = Command(
         [
             "xacro",
@@ -57,7 +57,7 @@ def generate_launch_description():
         parameters=[{"robot_description": robot_description_content, "use_sim_time": True}],
     )
 
-    # 3. Bridge ROS & Gazebo
+    # Bridge ROS & Gazebo
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
@@ -68,7 +68,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # 4. Spawn Robot
+    # Spawn Robot
     spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
@@ -80,7 +80,7 @@ def generate_launch_description():
         output="screen",
     )
 
-    # 5. Joystick and Teleoperation
+    # Joystick and Teleoperation
     joy_node = Node(
         package='joy',
         executable='joy_node',
@@ -100,7 +100,7 @@ def generate_launch_description():
         ]
     )
 
-    # 6. Controllers
+    # Controllers
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",
@@ -128,15 +128,14 @@ def generate_launch_description():
         )
     )
     
-    # Calculates the map -> odom transform
+    # Calculates the map to odom transform
     slam_toolbox = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [PathSubstitution(FindPackageShare("slam_toolbox")), "/launch/online_async_launch.py"]
         ),
         launch_arguments={'use_sim_time': 'true'}.items(),
     )
-
-    # --- Nav2 Bringup ---
+    
     # Launches the navigation stack (planner, controller, behavior trees)
     nav2_bringup = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

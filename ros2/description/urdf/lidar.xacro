@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- LIDAR is represented by a small cylinder floating above the robot. -->
+
     <!-- Currently using arbitrary values for model, change as needed -->
     <joint name="lidar_joint" type="fixed">
         <parent link="Base"/>

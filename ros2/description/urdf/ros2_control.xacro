@@ -42,6 +42,7 @@
         </ros2_control>
     </xacro:unless>
 
+    <!-- Allows Terrence to be controlled in Gazebo Sim -->
     <xacro:if value="$(arg sim_mode)">
         <ros2_control name="GazeboSystem" type="system">
             <hardware>

@@ -55,6 +55,7 @@
     <material>Gazebo/White</material>
   </gazebo>
 
+  <!-- Frictionless model of actual driver wheel (does drive the bot in the sim) s-->
   <link name="DriverWheel">
     <inertial>
       <origin xyz="-0.030264 6.665E-05 1.2263E-10" rpy="0 0 0" />
@@ -88,7 +89,7 @@
     <material>Gazebo/Blue</material>
       <!-- <mu1 value="0.001"/>
       <mu2 value="0.001"/> -->
-      <mu1 value="0.0"/> 
+      <mu1 value="0.0"/> <!-- ARE WE ALLOWED TO DO THIS??? -->
       <mu2 value="0.0"/>
       <!-- <kp value="10000000.0" />
       <kd value="1.0" /> -->
@@ -135,6 +136,7 @@
       <kd value="1.0" /> -->
   </gazebo>
 
+  <!-- Invisible driver wheel that allows Terrence to turn accurately -->
   <link name="DriverSprocket">
     <inertial>
       <origin xyz="0.0097746 -3.5292E-09 -5.2457E-08" rpy="0 0 0" />
@@ -386,6 +388,7 @@
     <material>Gazebo/White</material>
   </gazebo>
 
+  <!-- Mimic joints don't work in New Gazebo because it's dumb and stupid -->
   <!-- Mimic joints -->
   <!-- <gazebo>
     <plugin filename="gz-sim-mimic-joint-system" name="gz::sim::systems::MimicJoint">

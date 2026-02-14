@@ -6,6 +6,8 @@
         <origin xyz="0 0.27 0" rpy="-${pi/2} -${pi/2} 0"/>
     </joint>
 
+    <!-- The camera is represented by a simple box and cylinder floating above the bot-->
+     
     <link name="camera_link">
         <visual>
             <geometry>

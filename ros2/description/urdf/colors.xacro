@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Basic colors -->
+  <!-- Misc. colors for making different parts easier to identify -->
   <material name="red">
     <color rgba="1 0 0 1"/>
   </material>
