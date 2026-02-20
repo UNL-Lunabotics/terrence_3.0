@@ -63,12 +63,15 @@ def generate_launch_description():
     bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
+        name='gazebo',
         parameters=[
             {'config_file': bridge_params},
+            {'publish_rate': 400.0},
             {'qos_overrides./tf_static.publisher.durability': 'transient_local'}
         ],
         output='screen'
     )
+
 
     # Spawn Robot
     spawn_entity = Node(
