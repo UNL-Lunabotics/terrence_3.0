@@ -14,7 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='workstation',
-    maintainer_email='millsj255@gmail.com',
+    maintainer_email='caleb.hansolo@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     extras_require={
