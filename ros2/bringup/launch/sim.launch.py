@@ -27,7 +27,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [PathSubstitution(FindPackageShare("ros_gz_sim")), "/launch/gz_sim.launch.py"]
         ),
-        launch_arguments={'gz_args': '-r ros2/description/worlds/empty.sdf'}.items(),
+        launch_arguments={'gz_args': '-r ros2/description/worlds/world.sdf'}.items(),
     )
     
     # Sad and futile attempt at making the mimic joints work.
