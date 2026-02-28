@@ -27,7 +27,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [PathSubstitution(FindPackageShare("ros_gz_sim")), "/launch/gz_sim.launch.py"]
         ),
-        launch_arguments={'gz_args': '-r ros2/description/worlds/artemis_arena.sdf'}.items(),
+        launch_arguments={'gz_args': '-r ros2/description/worlds/world.sdf'}.items(),
     )
     
     # Sad and futile attempt at making the mimic joints work.
@@ -80,9 +80,9 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "terrence",
-            "-x", "2.0",
-            "-y", "2.0",
-            "-z", "1",
+            # "-x", "2.0",
+            # "-y", "2.0",
+            "-z", "0.5",
         ],
         output="screen",
     )
@@ -160,6 +160,18 @@ def generate_launch_description():
         }.items(),
     )
 
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        parameters=[
+            PathSubstitution(FindPackageShare("bringup"))
+            / "config"
+            / "ekf_params.yaml",
+            {'use_sim_time': True}
+        ]
+    )
+
     return LaunchDescription([
         gazebo,
         rsp,
@@ -170,6 +182,7 @@ def generate_launch_description():
         delay_joint_state_broadcaster_spawner,
         delay_terrence_controller_spawner,
         foxglove,
+        ekf_node,
         slam_toolbox,
         nav2_bringup,
     ])
