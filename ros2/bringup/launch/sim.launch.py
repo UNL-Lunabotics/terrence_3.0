@@ -27,7 +27,7 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             [PathSubstitution(FindPackageShare("ros_gz_sim")), "/launch/gz_sim.launch.py"]
         ),
-        launch_arguments={'gz_args': '-r ros2/description/worlds/world.sdf'}.items(),
+        launch_arguments={'gz_args': '-r ros2/description/worlds/artemis_arena.sdf'}.items(),
     )
     
     # Sad and futile attempt at making the mimic joints work.
@@ -80,7 +80,9 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "terrence",
-            "-z", "0.5",
+            "-x", "2.0",
+            "-y", "2.0",
+            "-z", "1",
         ],
         output="screen",
     )
