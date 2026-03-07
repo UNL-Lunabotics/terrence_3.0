@@ -80,6 +80,8 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "terrence",
+            # "-x", "2.0",
+            # "-y", "2.0",
             "-z", "0.5",
         ],
         output="screen",
@@ -133,6 +135,12 @@ def generate_launch_description():
         )
     )
     
+    foxglove = Node(
+        package='foxglove_bridge',
+        executable='foxglove_bridge',
+        name='foxglove_bridge',
+    )
+    
     # Calculates the map to odom transform
     slam_toolbox = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -148,8 +156,31 @@ def generate_launch_description():
         ),
         launch_arguments={
             'use_sim_time': 'true',
-            'params_file': PathSubstitution([FindPackageShare("bringup"), "config/nav2_params.yaml"])
+            'params_file': [PathSubstitution(FindPackageShare("bringup")), "/config/nav2_params.yaml"]
         }.items(),
+    )
+    
+    # Nav2 needs a laser scan, but we only have a point cloud from the camera. This node converts the point cloud to a fake laser scan.
+    pointcloud_to_scan = Node(
+        package='pointcloud_to_laserscan',
+        executable='pointcloud_to_laserscan_node',
+        name='pointcloud_to_laserscan',
+        remappings=[
+            ('cloud_in', '/camera/points'),
+            ('scan', '/scan')
+        ],
+    )
+
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        parameters=[
+            PathSubstitution(FindPackageShare("bringup"))
+            / "config"
+            / "ekf_params.yaml",
+            {'use_sim_time': True}
+        ]
     )
 
     return LaunchDescription([
@@ -161,6 +192,9 @@ def generate_launch_description():
         teleop_node,
         delay_joint_state_broadcaster_spawner,
         delay_terrence_controller_spawner,
+        foxglove,
+        ekf_node,
         slam_toolbox,
         nav2_bringup,
+        pointcloud_to_scan,
     ])

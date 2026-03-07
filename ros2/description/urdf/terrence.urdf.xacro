@@ -8,7 +8,11 @@
   <xacro:include filename="colors.xacro"/>
 
   <!-- LIDAR -->
-  <xacro:include filename="lidar.xacro"/>
+  <!-- Cant' use LiDAR anymore. If need reenabled, uncomment this and the roz_gz_bridge lidar-->
+  <!-- <xacro:include filename="lidar.xacro"/> -->
+
+  <!-- IMU -->
+  <xacro:include filename="imu.xacro"/>
 
   <!-- CAMERA -->
   <xacro:include filename="camera.xacro"/>
