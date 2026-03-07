@@ -159,6 +159,17 @@ def generate_launch_description():
             'params_file': [PathSubstitution(FindPackageShare("bringup")), "/config/nav2_params.yaml"]
         }.items(),
     )
+    
+    # Nav2 needs a laser scan, but we only have a point cloud from the camera. This node converts the point cloud to a fake laser scan.
+    pointcloud_to_scan = Node(
+        package='pointcloud_to_laserscan',
+        executable='pointcloud_to_laserscan_node',
+        name='pointcloud_to_laserscan',
+        remappings=[
+            ('cloud_in', '/camera/points'),
+            ('scan', '/scan')
+        ],
+    )
 
     ekf_node = Node(
         package='robot_localization',
@@ -185,4 +196,5 @@ def generate_launch_description():
         ekf_node,
         slam_toolbox,
         nav2_bringup,
+        pointcloud_to_scan,
     ])
