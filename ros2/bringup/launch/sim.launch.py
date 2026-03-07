@@ -80,8 +80,8 @@ def generate_launch_description():
         arguments=[
             "-topic", "robot_description",
             "-name", "terrence",
-            # "-x", "2.0",
-            # "-y", "2.0",
+            "-x", "2.0",
+            "-y", "2.0",
             "-z", "0.5",
         ],
         output="screen",
@@ -156,7 +156,7 @@ def generate_launch_description():
         ),
         launch_arguments={
             'use_sim_time': 'true',
-            'params_file': [PathSubstitution(FindPackageShare("bringup")), "/config/nav2_params.yaml"]
+            'params_file': [PathSubstitution(FindPackageShare("nav2_bringup")), "/params/nav2_params.yaml"]
         }.items(),
     )
     
@@ -193,8 +193,8 @@ def generate_launch_description():
         delay_joint_state_broadcaster_spawner,
         delay_terrence_controller_spawner,
         foxglove,
-        ekf_node,
+        # ekf_node,
         slam_toolbox,
         nav2_bringup,
-        pointcloud_to_scan,
+        # pointcloud_to_scan,
     ])
