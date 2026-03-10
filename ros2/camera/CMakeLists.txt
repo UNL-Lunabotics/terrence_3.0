@@ -43,4 +43,10 @@ install(
   DESTINATION share/${PROJECT_NAME}/launch
 )
 
+# I have no idea if this is right
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 ament_package()
