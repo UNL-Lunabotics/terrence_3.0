@@ -115,6 +115,7 @@ namespace terrence_controller
 
         // Initialize the realtime buffers
         rt_cmd_vel_.writeFromNonRT(CmdVel{0.0, 0.0, get_node()->now(), false});
+        rt_imu_cmd_.writeFromNonRT(sensor_msgs::msg::Imu{});
         rt_dig_cmd_.writeFromNonRT(DigCmd{});
         rt_mode_req_.writeFromNonRT(ModeRequest{Mode::IDLE, get_node()->now(), false});
 
