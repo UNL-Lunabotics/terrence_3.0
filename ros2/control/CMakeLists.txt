@@ -13,6 +13,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   controller_interface
   realtime_tools
   geometry_msgs
+  sensor_msgs
   std_msgs
   std_srvs
   nav_msgs
@@ -89,6 +90,7 @@ ament_target_dependencies(
   pluginlib
   realtime_tools
   geometry_msgs
+  sensor_msgs
   std_msgs
   std_srvs
   nav_msgs

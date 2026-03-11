@@ -3,6 +3,7 @@
 
 #include <controller_interface/controller_interface.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <realtime_tools/realtime_buffer.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
@@ -82,11 +83,13 @@ namespace terrence_controller
             };
 
             realtime_tools::RealtimeBuffer<CmdVel> rt_cmd_vel_;
+            realtime_tools::RealtimeBuffer<sensor_msgs::msg::Imu> rt_imu_cmd_;
             realtime_tools::RealtimeBuffer<DigCmd> rt_dig_cmd_;
             realtime_tools::RealtimeBuffer<ModeRequest> rt_mode_req_;
 
             // ROS subscriptions
             rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+            rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub_;
             rclcpp::Subscription<std_msgs::msg::Float64MultiArray>::SharedPtr dig_cmd_sub_;
             rclcpp::Subscription<std_msgs::msg::String>::SharedPtr set_mode_sub_;
             rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr reset_fault_srv_;
@@ -135,6 +138,7 @@ namespace terrence_controller
             // Helper functions (cb = callback)
             // Keep as much processing out of update as possible by giving it to other functions
             void cmdVelCb(const geometry_msgs::msg::Twist & msg);
+            void imuCb(const sensor_msgs::msg::Imu & msg);
             void digCmdCb(const std_msgs::msg::Float64MultiArray & msg);
             void setModeCb(const std_msgs::msg::String & msg);
 
@@ -159,6 +163,9 @@ namespace terrence_controller
             double x_{0.0};
             double y_{0.0};
             double yaw_{0.0};
+
+            std::string imu_topic_{"/imu"};
+            std::string imu_frame_id_{"imu_link"};
     };
 } // namespace terrence_controller
 

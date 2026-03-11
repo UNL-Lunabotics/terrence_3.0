@@ -123,6 +123,10 @@ namespace terrence_controller
             "/cmd_vel", rclcpp::SystemDefaultsQoS(),
             [this](const geometry_msgs::msg::Twist & msg) { cmdVelCb(msg); });
 
+        imu_sub_ = get_node()->create_subscription<sensor_msgs::msg::Imu>(
+            imu_topic_, rclcpp::SystemDefaultsQoS(),
+            [this](const sensor_msgs::msg::Imu & msg) { imuCb(msg); });
+
         dig_cmd_sub_ = get_node()->create_subscription<std_msgs::msg::Float64MultiArray>(
             "/dig_cmd", rclcpp::SystemDefaultsQoS(),
             [this](const std_msgs::msg::Float64MultiArray & msg) { digCmdCb(msg); });
@@ -246,6 +250,15 @@ namespace terrence_controller
         c.stamp = get_node()->now();
         c.valid = true;
         rt_cmd_vel_.writeFromNonRT(c);
+    }
+
+    void TerrenceController::imuCb(const sensor_msgs::msg::Imu & msg)
+    {
+        sensor_msgs::msg::Imu i;
+        i.linear_acceleration = msg.linear_acceleration;
+        i.angular_velocity = msg.angular_velocity;
+        i.orientation = msg.orientation;
+        rt_imu_cmd_.writeFromNonRT(i);
     }
 
     void TerrenceController::digCmdCb(const std_msgs::msg::Float64MultiArray & msg)
@@ -505,7 +518,7 @@ namespace terrence_controller
         (void)command_interfaces_[loader_cmd_idx_].set_value(loader_cmd_val_);
         (void)command_interfaces_[hopper_cmd_idx_].set_value(hopper_cmd_val_);
 
-        // Open loop odom
+        // Open-loop odom
         double wl = 0.0, wr = 0.0;
         if (left_vel_state_idx_ >= 0 && right_vel_state_idx_ >= 0)
         {
