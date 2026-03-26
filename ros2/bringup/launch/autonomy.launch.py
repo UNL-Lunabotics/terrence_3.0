@@ -99,10 +99,21 @@ def generate_launch_description():
   )
   
   # Launches the RealSense (depth camera and IMU) using the camera package
-  camera = IncludeLaunchDescription(
-    PythonLaunchDescriptionSource(
-      [PathSubstitution(FindPackageShare("camera")), "/launch/realsense.launch.py"]
-    )
+  # camera = IncludeLaunchDescription(
+  #   PythonLaunchDescriptionSource(
+  #     [PathSubstitution(FindPackageShare("camera")), "/launch/realsense.launch.py"]
+  #   )
+  # )
+  
+  ekf_node = Node(
+      package='robot_localization',
+      executable='ekf_node',
+      name='ekf_filter_node',
+      parameters=[
+          PathSubstitution(FindPackageShare("bringup"))
+          / "config"
+          / "ekf_params.yaml"
+      ]
   )
 
   return LaunchDescription([
@@ -114,5 +125,6 @@ def generate_launch_description():
       slam_toolbox,
       nav2_bringup,
       pointcloud_to_laserscan,
-      camera
+      # camera
+      ekf_node
   ])
