@@ -1,6 +1,6 @@
 import os
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument
+from launch.actions import ExecuteProcess, IncludeLaunchDescription, RegisterEventHandler, DeclareLaunchArgument
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, PathSubstitution, LaunchConfiguration
@@ -182,6 +182,18 @@ def generate_launch_description():
             {'use_sim_time': True}
         ]
     )
+    
+    rewire = ExecuteProcess(
+        cmd=['rewire', 'record', '-a'],
+        name='rewire_rerun_bridge',
+        output='screen'
+    )
+    
+    rerun = ExecuteProcess(
+        cmd=['rerun'],
+        name='rerun',
+        output='screen'
+    )
 
     return LaunchDescription([
         gazebo,
@@ -192,9 +204,11 @@ def generate_launch_description():
         teleop_node,
         delay_joint_state_broadcaster_spawner,
         delay_terrence_controller_spawner,
-        foxglove,
-        ekf_node,
-        slam_toolbox,
-        nav2_bringup,
-        pointcloud_to_scan,
+        # foxglove,
+        # ekf_node,
+        # slam_toolbox,
+        # nav2_bringup,
+        # pointcloud_to_scan,
+        rewire,
+        rerun,
     ])
